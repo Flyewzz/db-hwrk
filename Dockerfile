@@ -19,7 +19,7 @@ USER postgres
 RUN service postgresql start &&\
     psql --command "CREATE USER forum WITH SUPERUSER PASSWORD 'forum';" &&\
     createdb -O forum forum &&\
-#    createdb -T template0 -l en_US.UTF-8 -O forum forum &&\
+    #createdb -T template0 -l en_US.UTF-8 -O forum forum &&\
     service postgresql stop
 
 WORKDIR app
