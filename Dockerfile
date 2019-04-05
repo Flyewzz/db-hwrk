@@ -7,6 +7,7 @@ RUN go mod download & go build cmd/server/main.go
 
 FROM ubuntu:18.10
 ENV DEBIAN_FRONTEND=noninteractive
+EXPOSE 5000
 
 RUN apt-get update && apt-get install -y postgresql-10
 
@@ -24,5 +25,4 @@ RUN echo "unix_socket_directories = '/var/run/postgresql'" >> /etc/postgresql/10
 
 VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
 
-EXPOSE 5000
 CMD service postgresql start && ./main
