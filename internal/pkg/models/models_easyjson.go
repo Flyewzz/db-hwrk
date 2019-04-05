@@ -1316,8 +1316,6 @@ func easyjsonD2b7633eDecodeGithubComHackallcodeDbHomeworkInternalPkgModels13(in 
 			continue
 		}
 		switch key {
-		case "_":
-			out.Id = int64(in.Int64())
 		case "slug":
 			out.Slug = string(in.String())
 		case "title":
@@ -1342,16 +1340,6 @@ func easyjsonD2b7633eEncodeGithubComHackallcodeDbHomeworkInternalPkgModels13(out
 	out.RawByte('{')
 	first := true
 	_ = first
-	{
-		const prefix string = ",\"_\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.Int64(int64(in.Id))
-	}
 	{
 		const prefix string = ",\"slug\":"
 		if first {

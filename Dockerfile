@@ -12,14 +12,14 @@ EXPOSE 5000
 
 RUN apt-get update && apt-get install -y postgresql-10
 
-#RUN locale-gen en_US.UTF-8
+#RUN locale-gen ru_RU.UTF-8
 
 USER postgres
 
 RUN service postgresql start &&\
     psql --command "CREATE USER forum WITH SUPERUSER PASSWORD 'forum';" &&\
     createdb -O forum forum &&\
-    #createdb -T template0 -l en_US.UTF-8 -O forum forum &&\
+    #createdb -T template0 -l ru_RU.UTF-8 -O forum forum &&\
     service postgresql stop
 
 WORKDIR app

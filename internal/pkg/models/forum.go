@@ -6,7 +6,7 @@ import (
 
 // easyjson:json
 type Forum struct {
-	Id      int64  `json:"_"`
+	Id      int64  `json:"-"`
 	Slug    string `json:"slug" example:"pirate-stories"`
 	Title   string `json:"title" example:"Pirate stories"`
 	User    string `json:"user" example:"j.sparrow"`

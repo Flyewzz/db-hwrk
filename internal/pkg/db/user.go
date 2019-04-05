@@ -12,7 +12,7 @@ const (
 	GetUserByNicknameQuery        = `SELECT id, nickname, email, fullname, about FROM users WHERE LOWER(nickname) = LOWER($1)`
 	GetUserByNicknameOrEmailQuery = `SELECT id, nickname, email, fullname, about FROM users 
 	WHERE LOWER(nickname) = LOWER($1) OR LOWER(email) = LOWER($2)`
-	GetUsersByForumIdQuery = `SELECT DISTINCT u.id, u.nickname, u.email, u.fullname, u.about
+	GetUsersByForumIdQuery = `SELECT DISTINCT u.id, u.nickname, u.email, u.fullname, u.about, LOWER(u.nickname) AS lower_nickname
 	FROM threads AS t LEFT JOIN posts AS p ON t.id = p.thread_id
  	JOIN users AS u ON t.user_id = u.id OR p.user_id = u.id
 	WHERE t.forum_id = $1`
@@ -110,15 +110,15 @@ func GetForumUsers(tx *pgx.Tx, slug, limit, since, desc string) (models.Users, e
 	where := ""
 	if since != "" {
 		if desc == "true" {
-			where = " AND u.nickname < '" + since + "'"
+			where = " AND LOWER(u.nickname) < LOWER('" + since + "')"
 		} else {
-			where = " AND u.nickname > '" + since + "'"
+			where = " AND LOWER(u.nickname) > LOWER('" + since + "')"
 		}
 	}
 
-	orderBy := " ORDER BY u.nickname ASC"
+	orderBy := " ORDER BY lower_nickname ASC"
 	if desc == "true" {
-		orderBy = " ORDER BY u.nickname DESC"
+		orderBy = " ORDER BY lower_nickname DESC"
 	}
 
 	limitStr := ""
@@ -134,7 +134,8 @@ func GetForumUsers(tx *pgx.Tx, slug, limit, since, desc string) (models.Users, e
 
 	for rows.Next() {
 		user := models.User{}
-		err = rows.Scan(&user.Id, &user.Nickname, &user.Email, &user.FullName, &user.About)
+		lowerNickname := ""
+		err = rows.Scan(&user.Id, &user.Nickname, &user.Email, &user.FullName, &user.About, &lowerNickname)
 		if err != nil {
 			return users, err
 		}
