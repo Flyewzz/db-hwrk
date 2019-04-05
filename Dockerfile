@@ -3,7 +3,8 @@ FROM golang:1.12-stretch AS builder
 WORKDIR /usr/src/app
 COPY . .
 
-RUN go mod download & go build cmd/server/main.go
+#RUN go mod download
+RUN go build cmd/server/main.go
 
 FROM ubuntu:18.10
 ENV DEBIAN_FRONTEND=noninteractive
@@ -11,14 +12,14 @@ EXPOSE 5000
 
 RUN apt-get update && apt-get install -y postgresql-10
 
-#RUN locale-gen ru_RU.CP1251
+#RUN locale-gen en_US.UTF-8
 
 USER postgres
 
 RUN service postgresql start &&\
     psql --command "CREATE USER forum WITH SUPERUSER PASSWORD 'forum';" &&\
     createdb -O forum forum &&\
-#    createdb -O forum -l ru_RU.CP1251 forum &&\
+#    createdb -T template0 -l en_US.UTF-8 -O forum forum &&\
     service postgresql stop
 
 WORKDIR app
