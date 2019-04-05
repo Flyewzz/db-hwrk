@@ -1,24 +1,3 @@
--- DROP USER IF EXISTS forum;
--- CREATE USER forum WITH
---   LOGIN
---   NOSUPERUSER
---   INHERIT
---   NOCREATEDB
---   NOCREATEROLE
---   NOREPLICATION
---   CONNECTION LIMIT -1
---   PASSWORD 'forum';
-
--- DROP DATABASE IF EXISTS forum;
--- CREATE DATABASE forum
---   WITH
---   OWNER = forum
---   ENCODING = 'UTF8'
---   LC_COLLATE = 'Russian_Russia.1251'
---   LC_CTYPE = 'Russian_Russia.1251'
---   TABLESPACE = pg_default
---   CONNECTION LIMIT = -1;
-
 DROP TABLE IF EXISTS users;
 CREATE TABLE users
 (

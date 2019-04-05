@@ -11,11 +11,14 @@ EXPOSE 5000
 
 RUN apt-get update && apt-get install -y postgresql-10
 
+#RUN locale-gen ru_RU.CP1251
+
 USER postgres
 
 RUN service postgresql start &&\
     psql --command "CREATE USER forum WITH SUPERUSER PASSWORD 'forum';" &&\
     createdb -O forum forum &&\
+#    createdb -O forum -l ru_RU.CP1251 forum &&\
     service postgresql stop
 
 WORKDIR app
@@ -26,4 +29,4 @@ RUN echo "unix_socket_directories = '/var/run/postgresql'" >> /etc/postgresql/10
 
 VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
 
-CMD service postgresql start && psql -f init/init.sql && ./main
+CMD service postgresql start && ./main

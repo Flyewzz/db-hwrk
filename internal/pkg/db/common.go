@@ -38,7 +38,7 @@ func Open() (err error) {
 		return err
 	}
 
-	if query, err := ioutil.ReadFile("init/init.sql"); err != nil {
+	if query, err := ioutil.ReadFile("init/tables.sql"); err != nil {
 		return err
 	} else {
 		if _, err := conn.Exec(string(query)); err != nil {
