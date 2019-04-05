@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 
@@ -307,11 +306,8 @@ func GetThreadPosts(tx *pgx.Tx, slugOrId, limit, since, sort, desc string) (mode
 		return posts, err
 	}
 
-	query := GetThreadPostsQuery(limit, since, sort, desc)
-	fmt.Println(query)
-	rows, err := tx.Query(query, forumId)
+	rows, err := tx.Query(GetThreadPostsQuery(limit, since, sort, desc), forumId)
 	if err != nil {
-		fmt.Println(query)
 		return posts, err
 	}
 	defer rows.Close()

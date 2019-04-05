@@ -1,23 +1,25 @@
 -- DROP USER IF EXISTS forum;
-CREATE USER forum WITH
-  LOGIN
-  NOSUPERUSER
-  INHERIT
-  NOCREATEDB
-  NOCREATEROLE
-  NOREPLICATION
-  CONNECTION LIMIT -1
-  PASSWORD 'forum';
+-- CREATE USER forum WITH
+--   LOGIN
+--   NOSUPERUSER
+--   INHERIT
+--   NOCREATEDB
+--   NOCREATEROLE
+--   NOREPLICATION
+--   CONNECTION LIMIT -1
+--   PASSWORD 'forum';
 
 -- DROP DATABASE IF EXISTS forum;
-CREATE DATABASE forum
-  WITH
-  OWNER = forum
-  ENCODING = 'UTF8'
-  TABLESPACE = pg_default
-  CONNECTION LIMIT = -1;
+-- CREATE DATABASE forum
+--   WITH
+--   OWNER = forum
+--   ENCODING = 'UTF8'
+--   LC_COLLATE = 'Russian_Russia.1251'
+--   LC_CTYPE = 'Russian_Russia.1251'
+--   TABLESPACE = pg_default
+--   CONNECTION LIMIT = -1;
 
--- DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS users;
 CREATE TABLE users
 (
   id       BIGSERIAL    NOT NULL
@@ -40,7 +42,7 @@ CREATE INDEX users_nickname_index
 CREATE INDEX users_nickname_email_index
   ON users (LOWER(nickname), LOWER(email));
 
--- DROP TABLE IF EXISTS forums;
+DROP TABLE IF EXISTS forums;
 CREATE TABLE forums
 (
   id      BIGSERIAL    NOT NULL
@@ -58,7 +60,7 @@ CREATE UNIQUE INDEX forums_slug_uindex
 CREATE INDEX forums_slug_index
   ON forums (LOWER(slug));
 
--- DROP TABLE IF EXISTS threads;
+DROP TABLE IF EXISTS threads;
 CREATE TABLE threads
 (
   id       BIGSERIAL    NOT NULL
@@ -75,7 +77,7 @@ CREATE TABLE threads
 CREATE INDEX threads_slug_index
   ON threads (forum_id);
 
--- DROP TABLE IF EXISTS posts;
+DROP TABLE IF EXISTS posts;
 CREATE TABLE posts
 (
   id        BIGSERIAL   NOT NULL
@@ -91,7 +93,7 @@ CREATE TABLE posts
 CREATE INDEX posts_slug_index
   ON posts (thread_id);
 
--- DROP TABLE IF EXISTS votes;
+DROP TABLE IF EXISTS votes;
 CREATE TABLE votes
 (
   id        BIGSERIAL   NOT NULL

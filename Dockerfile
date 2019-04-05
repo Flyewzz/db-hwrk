@@ -13,16 +13,17 @@ RUN apt-get update && apt-get install -y postgresql-10
 
 USER postgres
 
+RUN service postgresql start &&\
+    psql --command "CREATE USER forum WITH SUPERUSER PASSWORD 'forum';" &&\
+    createdb -O forum forum &&\
+    service postgresql stop
+
 WORKDIR app
 COPY --from=builder /usr/src/app .
-
-RUN service postgresql start &&\
-    psql -f init/init.sql &&\
-    service postgresql stop
 
 RUN echo "listen_addresses = '*'\nsynchronous_commit = off\nfsync = off" >> /etc/postgresql/10/main/postgresql.conf
 RUN echo "unix_socket_directories = '/var/run/postgresql'" >> /etc/postgresql/10/main/postgresql.conf
 
 VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
 
-CMD service postgresql start && ./main
+CMD service postgresql start && psql -f init/init.sql && ./main

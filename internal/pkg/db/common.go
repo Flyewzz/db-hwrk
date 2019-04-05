@@ -2,6 +2,7 @@ package db
 
 import (
 	"errors"
+	"io/ioutil"
 
 	"github.com/jackc/pgx"
 )
@@ -25,7 +26,7 @@ func Open() (err error) {
 	if conn != nil {
 		return AlreadyInitError
 	}
-	conn, err = pgx.NewConnPool(pgx.ConnPoolConfig {
+	conn, err = pgx.NewConnPool(pgx.ConnPoolConfig{
 		ConnConfig: pgx.ConnConfig{
 			Database: database,
 			User:     user,
@@ -33,6 +34,17 @@ func Open() (err error) {
 		},
 		MaxConnections: maxConnections,
 	})
+	if err != nil {
+		return err
+	}
+
+	if query, err := ioutil.ReadFile("init/init.sql"); err != nil {
+		return err
+	} else {
+		if _, err := conn.Exec(string(query)); err != nil {
+			return err
+		}
+	}
 	return
 }
 

@@ -5,8 +5,8 @@ const (
 	database       = "forum"
 	user           = "forum"
 	password       = "forum"
-	maxConnections = 8
+	maxConnections = 100
 
 	UniqueErrorCode = "23505"
-	DateFormat = "2006-01-02T15:04:05.999Z07:00"
+	DateFormat      = "2006-01-02T15:04:05.999Z07:00"
 )
