@@ -3,6 +3,7 @@ package db
 import (
 	"errors"
 	"io/ioutil"
+	"log"
 
 	"github.com/jackc/pgx"
 )
@@ -22,10 +23,11 @@ var (
 
 var conn *pgx.ConnPool
 
-func Open() (err error) {
+func Open(resetDb bool) (err error) {
 	if conn != nil {
 		return AlreadyInitError
 	}
+
 	conn, err = pgx.NewConnPool(pgx.ConnPoolConfig{
 		ConnConfig: pgx.ConnConfig{
 			Database: database,
@@ -35,16 +37,27 @@ func Open() (err error) {
 		MaxConnections: maxConnections,
 	})
 	if err != nil {
+		log.Println("database connection error")
 		return err
 	}
+	log.Println("database has been connected")
 
-	if query, err := ioutil.ReadFile("init/tables.sql"); err != nil {
-		return err
-	} else {
-		if _, err := conn.Exec(string(query)); err != nil {
+	if resetDb {
+		err = ExecFromFile("init/db_reset_forum.sql")
+		if err != nil {
+			log.Println("database reset error")
 			return err
 		}
+		log.Println("database has been reset")
 	}
+
+	err = ExecFromFile("init/db_init_forum.sql")
+	if err != nil {
+		log.Println("database initialization error")
+		return err
+	}
+	log.Println("database has been initialized")
+
 	return
 }
 
@@ -104,4 +117,13 @@ func Exec(query string, args ...interface{}) (tag pgx.CommandTag, err error) {
 	}
 
 	return tag, tx.Commit()
+}
+
+func ExecFromFile(file string) error {
+	if query, err := ioutil.ReadFile(file); err != nil {
+		return err
+	} else {
+		_, err = conn.Exec(string(query))
+		return err
+	}
 }

@@ -2,64 +2,35 @@ package server
 
 import (
 	"log"
+	"strconv"
 
-	"github.com/qiangxue/fasthttp-routing"
 	"github.com/valyala/fasthttp"
 
-	c "github.com/hackallcode/db-homework/internal/pkg/controllers"
 	"github.com/hackallcode/db-homework/internal/pkg/db"
+	"github.com/hackallcode/db-homework/internal/pkg/router"
 )
 
 type Params struct {
-	Port      string
-	ApiPrefix string
+	Port  int64
+	Url   string
+	Reset bool
 }
 
 func StartApp(params Params) error {
-	log.Println("Server starting at " + params.Port)
+	portStr := strconv.FormatInt(params.Port, 10)
 
-	if err := db.Open(); err != nil {
+	if err := db.Open(params.Reset); err != nil {
 		return err
 	}
 
-	router := routing.New()
+	apiRouter := router.InitRouter(params.Url)
 
-	apiRouter := router.Group(params.ApiPrefix)
-
-	apiRouter.Get("/", c.ApiHandler)
-
-	userRouter := apiRouter.Group("/user")
-	userRouter.Post("/<nickname>/create", c.CreateUserHandler)
-	userRouter.Get("/<nickname>/profile", c.GetUserHandler)
-	userRouter.Post("/<nickname>/profile", c.UpdateUserHandler)
-
-	forumRouter := apiRouter.Group("/forum")
-	forumRouter.Post("/create", c.CreateForumHandler)
-	forumRouter.Get("/<slug>/details", c.GetForumHandler)
-	forumRouter.Post("/<slug>/create", c.CreateThreadHandler)
-	forumRouter.Get("/<slug>/threads", c.GetForumThreadsHandler)
-	forumRouter.Get("/<slug>/users", c.GetForumUsersHandler)
-
-	postRouter := apiRouter.Group("/post")
-	postRouter.Get("/<id>/details", c.GetFullPostHandler)
-	postRouter.Post("/<id>/details", c.UpdatePostHandler)
-
-	threadRouter := apiRouter.Group("/thread")
-	threadRouter.Post("/<slug_or_id>/create", c.CreatePostsHandler)
-	threadRouter.Get("/<slug_or_id>/posts", c.GetThreadPostsHandler)
-	threadRouter.Get("/<slug_or_id>/details", c.GetThreadHandler)
-	threadRouter.Post("/<slug_or_id>/details", c.UpdateThreadHandler)
-	threadRouter.Post("/<slug_or_id>/vote", c.VoteThreadHandler)
-
-	serviceRouter := apiRouter.Group("/service")
-	serviceRouter.Post("/clear", c.ClearHandler)
-	serviceRouter.Get("/status", c.StatusHandler)
-
-	return fasthttp.ListenAndServe(":"+params.Port, router.HandleRequest)
+	log.Printf("server is starting up at http://localhost:%v%v/...\n", portStr, params.Url)
+	return fasthttp.ListenAndServe(":"+portStr, apiRouter.HandleRequest)
 }
 
 func StopApp() error {
-	log.Println("Stopping server...")
+	log.Println("server is stopping...")
 	if err := db.Close(); err != nil {
 		return err
 	}

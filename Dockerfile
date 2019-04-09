@@ -1,33 +1,43 @@
-FROM golang:1.12-stretch AS builder
-
+FROM golang:latest AS builder
 WORKDIR /usr/src/app
-COPY . .
 
-#RUN go mod download
+# Cache
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
+
+# Build project
+COPY . .
 RUN go build cmd/server/main.go
 
 FROM ubuntu:18.10
-ENV DEBIAN_FRONTEND=noninteractive
-EXPOSE 5000
 
+# Install PostgreSQL
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y postgresql-10
 
-#RUN locale-gen ru_RU.UTF-8
+# Open ports
+EXPOSE 5000
 
 USER postgres
 
+# Copy app
+WORKDIR app
+COPY --from=builder /usr/src/app/main .
+COPY --from=builder /usr/src/app/init init
+
+# Init db
 RUN service postgresql start &&\
-    psql --command "CREATE USER forum WITH SUPERUSER PASSWORD 'forum';" &&\
-    createdb -O forum forum &&\
-    #createdb -T template0 -l ru_RU.UTF-8 -O forum forum &&\
+    psql --file=init/db_init.sql &&\
     service postgresql stop
 
-WORKDIR app
-COPY --from=builder /usr/src/app .
+# Configure PostgreSQL
+RUN sed -i 's/\([^\n]\+\)peer$/\1md5/' /etc/postgresql/10/main/pg_hba.conf
+RUN cat init/pg_hba.conf >> /etc/postgresql/10/main/pg_hba.conf
+RUN cat init/postgresql.conf >> /etc/postgresql/10/main/postgresql.conf
 
-RUN echo "listen_addresses = '*'\nsynchronous_commit = off\nfsync = off" >> /etc/postgresql/10/main/postgresql.conf
-RUN echo "unix_socket_directories = '/var/run/postgresql'" >> /etc/postgresql/10/main/postgresql.conf
+# Connect PostgreSQL
+VOLUME ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
 
-VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
-
+# Run DB & app
 CMD service postgresql start && ./main
