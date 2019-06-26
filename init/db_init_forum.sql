@@ -8,17 +8,14 @@ CREATE TABLE IF NOT EXISTS users
   about    TEXT
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS users_nickname_uindex
-  ON users (LOWER(nickname));
-
-CREATE UNIQUE INDEX IF NOT EXISTS users_email_uindex
+CREATE INDEX IF NOT EXISTS users_email_uindex
   ON users (LOWER(email));
 
 CREATE INDEX IF NOT EXISTS users_nickname_index
   ON users (LOWER(nickname));
 
-CREATE INDEX IF NOT EXISTS users_nickname_email_index
-  ON users (LOWER(nickname), LOWER(email));
+-- CREATE INDEX IF NOT EXISTS users_nickname_email_index
+--   ON users (LOWER(nickname), LOWER(email));
 
 CREATE TABLE IF NOT EXISTS forums
 (
@@ -30,9 +27,6 @@ CREATE TABLE IF NOT EXISTS forums
   posts   BIGINT       NOT NULL DEFAULT 0,
   threads INT          NOT NULL DEFAULT 0
 );
-
-CREATE UNIQUE INDEX IF NOT EXISTS forums_slug_uindex
-  ON forums (LOWER(slug));
 
 CREATE INDEX IF NOT EXISTS forums_slug_index
   ON forums (LOWER(slug));
@@ -50,6 +44,8 @@ CREATE TABLE IF NOT EXISTS threads
   votes    INT          NOT NULL DEFAULT 0
 );
 
+CREATE INDEX IF NOT EXISTS idx_threads_id ON threads (id);
+CREATE INDEX IF NOT EXISTS idx_threads_slug ON threads (LOWER(slug));
 CREATE INDEX IF NOT EXISTS threads_slug_index
   ON threads (forum_id);
 
@@ -65,8 +61,10 @@ CREATE TABLE IF NOT EXISTS posts
   is_edited BOOLEAN     NOT NULL DEFAULT FALSE
 );
 
-CREATE INDEX IF NOT EXISTS posts_slug_index
-  ON posts (thread_id);
+CREATE INDEX IF NOT EXISTS idx_posts_id ON posts (id);
+CREATE INDEX IF NOT EXISTS idx_posts_thread_id ON posts (thread_id, id);
+-- CREATE INDEX IF NOT EXISTS idx_posts_thread_id0 ON posts (thread_id, id) WHERE parent_id = 0;
+CREATE INDEX IF NOT EXISTS idx_posts_thread_id_created ON posts (id, created, thread_id);
 
 CREATE TABLE IF NOT EXISTS votes
 (
@@ -77,11 +75,9 @@ CREATE TABLE IF NOT EXISTS votes
   vote      BIGINT      NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS votes_thread_user_index
-  ON votes (thread_id, user_id);
-
 CREATE UNIQUE INDEX IF NOT EXISTS votes_thread_user_uindex
   ON votes (thread_id, user_id);
+
 
 -- CREATE FUNCTION IF NOT EXISTS user_update(in_nickname VARCHAR(32), in_email VARCHAR(255), in_fullname TEXT, in_about TEXT)
 --   RETURNS users
